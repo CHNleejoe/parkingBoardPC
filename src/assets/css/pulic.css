@@ -1,0 +1,37 @@
+.no-data {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 4rem;
+    position: relative;
+}
+
+.no-data>img {
+    width: 60%;
+}
+
+.no-data::after {
+    content: '暂时没有数据';
+    margin-top: 20px;
+    color: #999;
+}
+
+::-webkit-input-placeholder {
+    color: #E6E7E9 !important;
+}
+
+ :-moz-placeholder {
+    /* Firefox 18- */
+    color: #E6E7E9 !important;
+}
+
+ ::-moz-placeholder {
+    /* Firefox 19+ */
+    color: #E6E7E9 !important;
+}
+
+ :-ms-input-placeholder {
+    color: #E6E7E9 !important;
+}
