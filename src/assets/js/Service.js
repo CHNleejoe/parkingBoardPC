@@ -3,7 +3,7 @@
  */
 const Service = {
     // baseUrl:'http://192.168.3.188:8787/#/',
-    baseUrl: 'http://localhost:8089',
+    baseUrl: 'http://localhost:8090/#/',
     // baseUrl: 'https://apps.epipe.cn/app-https/pc/1.6.0/#/',
     queryString: function(params, postFlag) {
         let paramUrl = "";
@@ -24,4 +24,4 @@ const Service = {
             return null;
     }
 };
-module.exports = Service;
+module.exports = Service

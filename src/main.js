@@ -6,8 +6,8 @@ import router from './router'
 import axios from 'axios'
 import api from './api/api'
 // import './assets/js/rem'
-import '../static/js/Service.js'
-// Vue.prototype.Service = Service;
+import Service from './assets/js/Service'
+Vue.prototype.Service = Service;
 
 // 引入ElementUI
 import ElementUI from 'element-ui';

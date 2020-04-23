@@ -27,12 +27,12 @@
                 </el-date-picker>
             </div>
             <div class="btns">
-                <el-button class="search-btn" type="primary">查询</el-button>
+                <el-button class="search-btn" type="primary" @click="searchAllData">查询</el-button>
             </div>
         </div>
         <div class="datas">
             <div
-                :class="{'data-item': true, point: item.point}"
+                :class="{'data-item': true, point: item.point, nomar: (hasParkingData && index == 4) || !hasParkingData && index == 5}"
                 v-for="(item, index) in dataList"
                 :key="index"
                 v-show="item.display == 'hasParkingData'?hasParkingData:true"
@@ -47,6 +47,20 @@
                 </div>
             </div>
         </div>
+        <div class="charts">
+            <div class="user-type chart-item">
+                <div id="userTypeChart"></div>
+            </div>
+            <div class="car-type chart-item">
+                <div id="carTypeChart"></div>
+            </div>
+            <div class="traffic-flow chart-item">
+                <div id="trafficFlowChart"></div>
+            </div>
+            <div class="charge chart-item">
+                <div id="chargeChart"></div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -58,13 +72,13 @@ export default {
         return {
             // 看板items渲染数据以及获取数据
             dataList:[
-                {label: '进出车辆总量', labelStr: 'total', icon:'./static/imgs/car.png', unit: '辆', herf:'/inOut', expend: {inOut: 0}, display: true,point: true},
-                {label: '进场车辆总量', labelStr: 'enter', icon:'./static/imgs/out.png', unit: '辆', herf:'/inOut', expend: {inOut: 1}, display: true,point: true},
-                {label: '出场车辆总量', labelStr: 'out', icon:'./static/imgs/out-yellow.png', unit: '辆', herf:'/inOut', expend: {inOut: 2}, display: true,point: true},
-                {label: '在场车辆总数', labelStr: 'curr', icon:'./static/imgs/parking-red.png', unit: '辆', herf:'/inParking', display: 'hasParkingData',point: true},
+                {label: '进出车辆总量', labelStr: 'total', icon:'./static/imgs/car.png', unit: '辆', herf:'inOut', expend: {inOut: 0}, display: true,point: true},
+                {label: '进场车辆总量', labelStr: 'enter', icon:'./static/imgs/out.png', unit: '辆', herf:'inOut', expend: {inOut: 1}, display: true,point: true},
+                {label: '出场车辆总量', labelStr: 'out', icon:'./static/imgs/out-yellow.png', unit: '辆', herf:'inOut', expend: {inOut: 2}, display: true,point: true},
+                {label: '在场车辆总数', labelStr: 'curr', icon:'./static/imgs/parking-red.png', unit: '辆', herf:'inParking', display: 'hasParkingData',point: true},
                 {label: '停车场总车位数', labelStr: 'parkPlaceNum', icon:'./static/imgs/parking.png', unit: '个', herf:'', display: true,point: false},
                 {label: '剩余车位数', labelStr: 'leftPlaceNum', icon:'./static/imgs/parking-green.png', unit: '个', herf:'', display: true,point: false},
-                {label: '收到停车费', labelStr: 'price', icon:'./static/imgs/money.png', unit: '元', herf:'/charge', display: true,point: true},
+                {label: '收到停车费', labelStr: 'price', icon:'./static/imgs/money.png', unit: '元', herf:'charge', display: true,point: true},
             ],
             boardData: { 
                 total: 0,
@@ -78,7 +92,7 @@ export default {
 
             // 时间类型控制器数据
             dateTypePopupCtl: false,
-            dateTypeColumns:[{label:'本日',value:0},{label:'本月',value:1},{label:'本年',value:2},{label:'自定义',value:3}],
+            dateTypeColumns:[{label:'今日',value:0},{label:'本月',value:1},{label:'本年',value:2},{label:'自定义',value:3}],
             dateTypeIndex: 0,
             
             // 时间选择器控制器数据
@@ -99,7 +113,9 @@ export default {
             // 收费统计图表数据  停车场收费趋势
             chargeData: {},
 
-            hasParkingData: true
+            hasParkingData: true,
+            
+            timer: 0
         }
     },
     watch: {
@@ -128,7 +144,7 @@ export default {
     mounted() {
         console.log('board mounted ----')
         const self = this;
-        // self.searchAllData()    
+        self.searchAllData()    
     },
     methods:{
         goBack() {
@@ -146,7 +162,7 @@ export default {
         setStartDate(value) {
             const self = this;
             // if(value > dayjs(self.endDate)) {
-            //     // Toast('开始时间不能大于结束时间')
+            //     // self.$message('开始时间不能大于结束时间')
             //     self.startDate  = dayjs(self.endDate);
             //     return
             // }
@@ -156,7 +172,7 @@ export default {
         setEndDate(value) {
             const self = this;
             // if(value < dayjs(self.startDate)) {
-            //     // Toast('结束时间不能小于开始时间')
+            //     // self.$message('结束时间不能小于开始时间')
             //     self.endDate  = dayjs(self.startDate);
             //     return
             // }
@@ -196,17 +212,20 @@ export default {
         turnPage(item){
             const self = this;
             if(item.herf == '') return
-            let startDate = self.startDate,
-                endDate = self.endDate;
+            let startDate = dayjs(self.startDate).format('YYYY-MM-DD'),
+                endDate = dayjs(self.endDate).format('YYYY-MM-DD');
             if(self.dateTypeIndex == 1) {
-                startDate = dayjs(self.startDate).format('YYYY-MM-DD')
-                endDate = dayjs(self.endDate).endOf('month').format('YYYY-MM-DD')
+                startDate = dayjs(startDate).format('YYYY-MM-DD')
+                endDate = dayjs(endDate).endOf('month').format('YYYY-MM-DD')
             }else if(self.dateTypeIndex == 2) {
-                // item.herf=='/inParking'?'':Toast('由于数据量过大，查询范围只能为30天');
+                // item.herf=='/inParking'?'':self.$message('由于数据量过大，查询范围只能为30天');
                 startDate = dayjs().startOf('month').format('YYYY-MM-DD')
                 endDate = dayjs().endOf('month').format('YYYY-MM-DD')
+            }else if(self.dateTypeIndex == 3 && Math.abs(dayjs(startDate).diff(dayjs(endDate),'day'))>30){
+                startDate = dayjs(endDate).subtract(1,'month').format('YYYY-MM-DD')
+                // endDate = dayjs().endOf('month').format('YYYY-MM-DD')
             }
-            self.$router.push({ path: item.herf, query: { startDate: startDate, endDate: endDate, expend: item.expend || ''} });
+            window.open(this.Service.baseUrl+item.herf+'?startDate='+startDate+'&endDate='+endDate+'&expend='+JSON.stringify(item.expend), "_blank");
         },
         searchAllData() {
             // console.warn('searchAllData')
@@ -220,6 +239,19 @@ export default {
         formatDateParams() {
             let params = {}
             const self = this;
+            if(dayjs(dayjs(self.startDate).format('YYYY-MM-DD'))>dayjs(dayjs(self.endDate).format('YYYY-MM-DD'))) {
+                clearTimeout(self.timer)
+                self.timer = setTimeout(()=> {
+                    // self.$message('开始时间不能大于结束时间');
+                    this.$message({
+                        message: '开始时间不能大于结束时间',
+                        type: 'warning'
+                    });
+                    self.startDate = self.endDate
+                }, 100)
+
+                return false
+            }
             switch(self.dateTypeIndex) {
                 case 0: 
                     params.startTime = dayjs(self.startDate).format('YYYY-MM-DD')
@@ -244,24 +276,31 @@ export default {
         requestGetBoard() {
             const self = this;
             let params = self.formatDateParams()
+            if(!params) {
+                return
+            }
+
             self.$api.getBoard(params).then(res => {
                 console.log('getBoard:',res)
                 if(res.h.code != 200) {
-                    // Toast(res.h.msg)
+                    self.$message.error(res.h.msg)
                     return
                 }
                 self.boardData = res.b
-                self.hasParkingData = (self.startDate==self.endDate && self.startDate == dayjs().format('YYYY-MM-DD'))
+                self.hasParkingData = (dayjs(self.startDate).format('YYYY-MM-DD')==dayjs(self.endDate).format('YYYY-MM-DD') && dayjs(self.startDate).format('YYYY-MM-DD') == dayjs().format('YYYY-MM-DD'))
             })
         },
         // 车辆进出用户类型统计
         requestGetUserTypeList() {
             const self = this;
             let params = self.formatDateParams()
+            if(!params) {
+                return
+            }
             self.$api.getUserTypeList(params).then(res => {
                 console.log('getUserTypeList:',res)
                 if(res.h.code != 200) {
-                    // Toast(res.h.msg)
+                    self.$message.error(res.h.msg)
                     return
                 }
                 self.userTypeData = res.b
@@ -279,6 +318,14 @@ export default {
                 yData.push(item.userType)
             })
             var option = {
+                title: {
+                    text: '车辆进出用户类型统计',
+                    left: 'center',
+                    textStyle: {
+                        color: 'white',
+                        lineHeight: 58
+                    }
+                },
                 color: ['#767EFF', '#FEC400', '#F65B62', '#43E97D', '#B620E0'],
                 tooltip: {
                     trigger: 'item',
@@ -288,7 +335,7 @@ export default {
                     orient: 'horizontal',
                     itemGap: 0,
                     left: 'center',
-                    bottom: 5,
+                    top: 58,
                     data: yData,
                     icon:'circle',
                     textStyle: {
@@ -300,9 +347,10 @@ export default {
                         name: '进出用户',
                         type: 'pie',
                         radius: [0, '65%'],
-                        top: '-8%',
-                        height:'auto',
-                        width: 'auto',
+                        left: 'center',
+                        top: '20%',
+                        height:'360',
+                        width: '360',
                         label: {
                             formatter: '{b}\n({d}%)',
                             fontSize: 10
@@ -320,10 +368,13 @@ export default {
         requestGetUserPriceList() {
             const self = this;
             let params = self.formatDateParams()
+            if(!params) {
+                return
+            }
             self.$api.getUserPriceList(params).then(res => {
                 console.log('getUserTypeList:',res)
                 if(res.h.code != 200) {
-                    // Toast(res.h.msg)
+                    self.$message.error(res.h.msg)
                     return
                 }
                 self.carTypeData = res.b
@@ -342,7 +393,14 @@ export default {
             })
             var option = {
                 color: ['#767EFF', '#FEC400', '#F65B62', '#43E97D', '#B620E0'],
-
+                title: {
+                    text: '车辆收费用户类型统计',
+                    left: 'center',
+                    textStyle: {
+                        color: 'white',
+                        lineHeight: 58
+                    }
+                },
                 tooltip: {
                     trigger: 'item',
                     formatter: '{a} <br/>{b}: {c} ({d}%)'
@@ -351,7 +409,7 @@ export default {
                     orient: 'horizontal',
                     itemGap: 0,
                     left: 'center',
-                    bottom: 5,
+                    top: 58,
                     data: yData,
                     icon:'circle',
                     textStyle: {
@@ -363,9 +421,11 @@ export default {
                         name: '收费用户',
                         type: 'pie',
                         radius: [0, '65%'],
-                        top: '-8%',
-                        height:'auto',
-                        width: 'auto',
+                        // top: '60',
+                        left: 'center',
+                        top: '20%',
+                        height:'360',
+                        width: '360',
                         label: {
                             formatter: '{b}\n({d}%)',
                             fontSize: 10
@@ -383,10 +443,14 @@ export default {
         requestGetCarFlowList() {
             const self = this;
             let params = self.formatDateParams()
+            console.error(params)
+            if(!params) {
+                return
+            }
             self.$api.getCarFlow(params).then(res => {
                 console.log('getCarFlow:',res)
                 if(res.h.code != 200) {
-                    // Toast(res.h.msg)
+                    self.$message.error(res.h.msg)
                     return
                 }
                 self.trafficFlowData = res.b
@@ -419,10 +483,11 @@ export default {
                         areaStyle: {},
                         data: []
                     }]
+                    console.warn(self.dateTypeIndex)
             self.trafficFlowData.map(item => {
-                if(self.dateTypeIndex == 0 || (self.dateTypeIndex == 3 && self.startDate == self.endDate)) {
+                if(self.dateTypeIndex == 0 || (self.dateTypeIndex == 3 && dayjs(self.startDate).format('YYYY-MM-DD')==dayjs(self.endDate).format('YYYY-MM-DD'))) {
                     xData.push(dayjs(item.time).hour()+'点')
-                } else if(self.dateTypeIndex == 1){
+                } else if(self.dateTypeIndex == 1 || self.dateTypeIndex == 3){
                     xData.push(dayjs(item.time).format('D')+'号')
                 } else {
                     xData.push(dayjs(item.time).format('M')+'月')
@@ -433,7 +498,13 @@ export default {
             })
             var option = {
                 color: ['#767EFF', '#FEC400', '#F65B62', '#43E97D', '#B620E0'],
-
+                title: {
+                    text: '车流实时趋势',
+                    left: 'center',
+                    textStyle: {
+                        color: 'white',
+                    }
+                },
                 tooltip: {
                     trigger: 'axis',
                     axisPointer: {
@@ -445,9 +516,9 @@ export default {
                 },
                 legend: {
                     orient: 'horizontal',
-                    itemGap: 10,
+                    itemGap: 5,
                     left: 'center',
-                    top: 10,
+                    top: 30,
                     itemWidth:40,
                     itemHeight: 6,
                     data: ['进出场车辆总数', '进场车辆数', '出场车辆数'],
@@ -457,8 +528,9 @@ export default {
                     }
                 },
                 grid: {
-                    left: '3%',
-                    right: '4%',
+                    top: '80',
+                    left: '0%',
+                    right: '8%',
                     bottom: '3%',
                     containLabel: true
                 },
@@ -493,10 +565,13 @@ export default {
         requestGetPriceFlowList() {
             const self = this;
             let params = self.formatDateParams()
+            if(!params) {
+                return
+            }
             self.$api.getPriceFlow(params).then(res => {
                 console.log('getPriceFlow:',res)
                 if(res.h.code != 200) {
-                    // Toast(res.h.msg)
+                    self.$message.error(res.h.msg)
                     return
                 }
                 self.chargeData = res.b
@@ -528,9 +603,9 @@ export default {
                         data: []
                     }]
             self.chargeData.map(item => {
-                if(self.dateTypeIndex == 0 || (self.dateTypeIndex == 3 && self.startDate == self.endDate)) {
+                if(self.dateTypeIndex == 0 || (self.dateTypeIndex == 3 && dayjs(self.startDate).format('YYYY-MM-DD')==dayjs(self.endDate).format('YYYY-MM-DD'))) {
                     xData.push(dayjs(item.time).hour()+'点')
-                } else if(self.dateTypeIndex == 1){
+                } else if(self.dateTypeIndex == 1 || self.dateTypeIndex == 3){
                     xData.push(dayjs(item.time).format('D')+'号')
                 } else {
                     xData.push(dayjs(item.time).format('M')+'月')
@@ -541,7 +616,13 @@ export default {
             })
             var option = {
                 color: ['#767EFF', '#FEC400', '#F65B62', '#43E97D', '#B620E0'],
-
+                title: {
+                    text: '停车场收费趋势',
+                    left: 'center',
+                    textStyle: {
+                        color: 'white',
+                    }
+                },
                 tooltip: {
                     trigger: 'axis',
                     axisPointer: {
@@ -555,7 +636,7 @@ export default {
                     orient: 'horizontal',
                     itemGap: 10,
                     left: 'center',
-                    top: 10,
+                    top: 30,
                     itemWidth:40,
                     itemHeight: 6,
                     data: ['总收费', '月卡收费', '临时车收费'],
@@ -565,9 +646,10 @@ export default {
                     }
                 },
                 grid: {
-                    left: '3%',
-                    right: '4%',
+                    left: '5%',
+                    right: '3%',
                     bottom: '3%',
+                    top: '80',
                     containLabel: true
                 },
                 xAxis: [
@@ -633,7 +715,7 @@ export default {
                     height: auto;
                 }
                 /deep/ .el-input__inner{
-                    background: #342660;
+                    background: #131929;
                     color: #E6E7E9;
                     height: 31px;
                 }
@@ -687,7 +769,7 @@ export default {
                     transition: all .3s;
                     top: -1px;
                 }
-                &:nth-child(5){
+                &.nomar{
                     margin-right: 0;
                     width: 164px;
                 }
@@ -725,6 +807,39 @@ export default {
                     }
                 }
                 
+            }
+        }
+        .charts{
+            box-sizing: border-box;
+            padding: 0 50px;
+            background:rgba(19,25,41,1);
+            margin-bottom: 116px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            .chart-item{
+                width:calc(50%);
+                overflow: hidden;
+                margin: 0 0px 50px 0px;
+                box-sizing: border-box;
+             
+                #userTypeChart{
+                    width: 100%;
+                    height: 411px;
+                }
+                #carTypeChart{
+                    width: 100%;
+                    height: 411px;
+                }
+                #trafficFlowChart{
+                    width: 100%;
+                    height: 364px;
+                }
+                #chargeChart{
+                    width: 100%;
+                    height: 364px;
+                }
             }
         }
     }

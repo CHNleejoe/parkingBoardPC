@@ -8,7 +8,7 @@ import { getPorts } from 'portfinder';
 
 
 // axios.defaults.baseURL = 'http://139.9.1.59:8080/'; //59服务器
-axios.defaults.baseURL = 'http://192.168.3.171:8680/'; //测试服务器
+axios.defaults.baseURL = 'http://tps.apipecloud.com/'; //测试服务器
 // axios.defaults.baseURL = 'http://192.168.3.194:8080/'; //本地
 
 // axios.defaults.withCredentials = true
@@ -24,11 +24,6 @@ axios.defaults.baseURL = 'http://192.168.3.171:8680/'; //测试服务器
 //     });
 
 const article = {
-
-    getDepartment(param) {
-        return post('/hr/report/get_department', param) //获取工程状态
-    },
-
     getBoard(param) { //获取看板数据
         return get('/parkapi/v1/park/getBoard', param)
     },
