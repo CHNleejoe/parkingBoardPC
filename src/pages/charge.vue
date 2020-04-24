@@ -32,7 +32,7 @@
                 </div>
                 <div class="btns">
                     <el-button class="search-btn" type="primary" @click="onRefresh(1)">查询</el-button>
-                    <el-button class="pull-btn" type="primary" @click="onRefresh">导出</el-button>
+                    <el-button class="pull-btn" type="primary" @click="exportExcel">导出</el-button>
                 </div>
             </div>
             <div class="datas">
@@ -94,13 +94,6 @@
                             </template>
                         </el-table-column>
                         <el-table-column
-                            prop="price"
-                            label="消费金额">
-                            <template slot-scope="{row}">
-                                {{ row.price}}
-                            </template>
-                        </el-table-column>
-                        <el-table-column
                             prop="payType"
                             label="支付方式">
                             <template slot-scope="{row}">
@@ -116,7 +109,7 @@
                         </el-table-column>
                         <el-table-column
                             prop="price"
-                            label="充值金额">
+                            label="金额">
                             <template slot-scope="{row}">
                                 {{ row.price || '/' }}
                             </template>
@@ -141,6 +134,9 @@
 
 <script>
 import dayjs from 'dayjs';
+
+import FileSaver from 'file-saver'
+import XLSX from 'xlsx'
 
 export default {
     data(){
@@ -217,6 +213,56 @@ export default {
         day(t) {
             // console.log(new Date(t))
             return new Date(t)
+        },
+        // 导出表格
+        exportExcel () {
+            const self = this;
+
+            var inoutStr = ''
+            self.carTypeColumns.map(i => {
+                self.carTypeIndex == i.value?inoutStr = i.label:''
+            })
+
+            var filename = dayjs(self.startDate).format('YYYY年MM月DD日')+'到'+dayjs(self.endDate).format('YYYY年MM月DD日')+inoutStr+"停车消费信息.xlsx";
+            // 数据格式
+            var data = []
+
+            let params = {
+                pageNo: 1,
+                pageSize: 0,
+                key: self.key,
+                type: self.carTypeIndex,
+                startTime: dayjs(self.startDate).format('YYYY-MM-DD'),
+                endTime: dayjs(self.endDate).format('YYYY-MM-DD'),
+            }
+
+            self.$api.getPriceDetails(params).then(res => {
+                
+                if(res.h.code != 200) {
+                    self.$message.error(res.h.msg)
+                    return
+                }
+                let listData = res.b.dataList
+
+                // 数据格式处理
+                data = [['车牌号', '用户类型', '用户名称', '联系电话', '公司名称', '进场时间', '出场时间', '支付方式', '充值时间', '金额']]
+                let dataItem = []
+                listData.map(item => {
+                    dataItem = [item.carNo, item.userType, item.userName, item.telephoneNum, item.companyName, item.enterTime, item.outTime, item.payType, item.createTime, item.price]
+                    data.push(dataItem)
+                })
+
+                // 创建工作簿和工作表
+                var wb = XLSX.utils.book_new(), // 工作簿，即一个Excel文件
+                    ws = XLSX.utils.aoa_to_sheet(data); // 工作表，即Excel内部的工作表
+                
+                // "SheetJS" 为工作表名称，即Excel文件中工作表
+                XLSX.utils.book_append_sheet(wb, ws, "搜索条件为" + self.key);
+            
+                // 写出Excel工作簿
+                XLSX.writeFile(wb, filename);
+
+            })
         },
         turnPage(url){
             const self = this;

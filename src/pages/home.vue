@@ -32,7 +32,7 @@
         </div>
         <div class="datas">
             <div
-                :class="{'data-item': true, point: item.point, nomar: (hasParkingData && index == 4) || !hasParkingData && index == 5}"
+                :class="{'data-item': true, point: item.point, nomar: (hasParkingData && index == 4) || !hasParkingData && index == 6}"
                 v-for="(item, index) in dataList"
                 :key="index"
                 v-show="item.display == 'hasParkingData'?hasParkingData:true"
@@ -77,7 +77,7 @@ export default {
                 {label: '出场车辆总量', labelStr: 'out', icon:'./static/imgs/out-yellow.png', unit: '辆', herf:'inOut', expend: {inOut: 2}, display: true,point: true},
                 {label: '在场车辆总数', labelStr: 'curr', icon:'./static/imgs/parking-red.png', unit: '辆', herf:'inParking', display: 'hasParkingData',point: true},
                 {label: '停车场总车位数', labelStr: 'parkPlaceNum', icon:'./static/imgs/parking.png', unit: '个', herf:'', display: true,point: false},
-                {label: '剩余车位数', labelStr: 'leftPlaceNum', icon:'./static/imgs/parking-green.png', unit: '个', herf:'', display: true,point: false},
+                {label: '剩余车位数', labelStr: 'leftPlaceNum', icon:'./static/imgs/parking-green.png', unit: '个', herf:'', display: 'hasParkingData',point: false},
                 {label: '收到停车费', labelStr: 'price', icon:'./static/imgs/money.png', unit: '元', herf:'charge', display: true,point: true},
             ],
             boardData: { 
@@ -333,7 +333,7 @@ export default {
                 },
                 legend: {
                     orient: 'horizontal',
-                    itemGap: 0,
+                    itemGap: 10,
                     left: 'center',
                     top: 58,
                     data: yData,
@@ -407,7 +407,7 @@ export default {
                 },
                 legend: {
                     orient: 'horizontal',
-                    itemGap: 0,
+                    itemGap: 10,
                     left: 'center',
                     top: 58,
                     data: yData,
@@ -540,6 +540,11 @@ export default {
                         boundaryGap: false,
                         color: '#fff',
                         data: xData,
+                        splitLine:{
+                            lineStyle: {
+                                opacity: .2
+                            }
+                        },
                         axisLabel:{
                             color: '#fff',
                             interval: 3,
@@ -550,6 +555,11 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
+                        splitLine:{
+                            lineStyle: {
+                                opacity: .2
+                            }
+                        },
                         axisLabel:{
                             color: '#fff',
                             formatter:'{value} 个'
@@ -657,6 +667,11 @@ export default {
                         type: 'category',
                         boundaryGap: false,
                         color: '#fff',
+                        splitLine:{
+                            lineStyle: {
+                                opacity: .2
+                            }
+                        },
                         data: xData,
                         axisLabel:{
                             color: '#fff',
@@ -669,6 +684,11 @@ export default {
                 yAxis: [
                     {
                         type: 'value',
+                        splitLine:{
+                            lineStyle: {
+                                opacity: .2
+                            }
+                        },
                         axisLabel:{
                             color: '#fff',
                             formatter:'{value} 元'

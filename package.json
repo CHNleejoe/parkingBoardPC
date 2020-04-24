@@ -15,10 +15,12 @@
         "dayjs": "^1.8.24",
         "echarts": "^4.7.0",
         "element-ui": "^2.13.1",
+        "file-saver": "^2.0.2",
         "insert-css": "^2.0.0",
         "postcss-pxtorem": "^5.1.1",
         "vue": "^2.5.2",
-        "vue-router": "^3.0.1"
+        "vue-router": "^3.0.1",
+        "xlsx": "^0.15.6"
     },
     "devDependencies": {
         "autoprefixer": "^7.1.2",

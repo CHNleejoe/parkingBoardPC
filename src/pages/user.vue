@@ -32,7 +32,7 @@
                 </div>
                 <div class="btns">
                     <el-button class="search-btn" type="primary" @click="onRefresh(1)">查询</el-button>
-                    <el-button class="pull-btn" type="primary" @click="onRefresh">导出</el-button>
+                    <el-button class="pull-btn" type="primary" @click="exportExcel">导出</el-button>
                 </div>
             </div>
             <div class="datas">
@@ -93,13 +93,6 @@
                                 {{ row.endDate || '/' }}
                             </template>
                         </el-table-column>
-                        <el-table-column
-                            prop="price"
-                            label="状态">
-                            <template slot-scope="{row}">
-                                {{ row.price || '/'}}
-                            </template>
-                        </el-table-column>
                     </el-table>
                     <div class="pagination">
                         <el-pagination
@@ -120,6 +113,8 @@
 
 <script>
 import dayjs from 'dayjs';
+import FileSaver from 'file-saver'
+import XLSX from 'xlsx'
 
 export default {
     data(){
@@ -196,6 +191,53 @@ export default {
         day(t) {
             // console.log(new Date(t))
             return new Date(t)
+        },
+        // 导出表格
+        exportExcel () {
+            const self = this;
+            // var filename = dayjs(self.startDate).format('YYYY-MM-DD')+'到'+dayjs(self.endDate).format('YYYY-MM-DD')+"生效的会员车辆信息.xlsx";
+
+            var filename = "会员车辆信息.xlsx";
+            // 数据格式
+            var data = []
+
+            let params = {
+                pageNo: 1,
+                pageSize: 0,
+                key: self.key,
+                startTime: dayjs(self.startDate).format('YYYY-MM-DD'),
+                endTime: dayjs(self.endDate).format('YYYY-MM-DD'),
+            }
+
+            self.$api.getUserList(params).then(res => {
+                
+                if(res.h.code != 200) {
+                    self.$message.error(res.h.msg)
+                    return
+                }
+                let listData = res.b.dataList
+
+                // 数据格式处理
+                data = [['车牌号', '用户类型', '用户名称', '联系电话', '公司名称', '生效时间', '结束时间']]
+                let dataItem = []
+                listData.map(item => {
+                    dataItem = [item.licenseNumber, item.userType, item.userName, item.telephoneNum, item.companyName, item.startDate, item.endDate]
+                    data.push(dataItem)
+                })
+
+                // 创建工作簿和工作表
+                var wb = XLSX.utils.book_new(), // 工作簿，即一个Excel文件
+                    ws = XLSX.utils.aoa_to_sheet(data); // 工作表，即Excel内部的工作表
+                
+                // "SheetJS" 为工作表名称，即Excel文件中工作表
+                // XLSX.utils.book_append_sheet(wb, ws, "会员车辆信息");
+                XLSX.utils.book_append_sheet(wb, ws, "搜索条件为" + self.key);
+
+            
+                // 写出Excel工作簿
+                XLSX.writeFile(wb, filename);
+
+            })
         },
         turnPage(url){
             const self = this;

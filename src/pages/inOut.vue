@@ -32,7 +32,7 @@
                 </div>
                 <div class="btns">
                     <el-button class="search-btn" type="primary" @click="onRefresh(1)">查询</el-button>
-                    <el-button class="pull-btn" type="primary" @click="onRefresh">导出</el-button>
+                    <el-button class="pull-btn" type="primary" @click="exportExcel">导出</el-button>
                 </div>
             </div>
             <div class="datas">
@@ -40,6 +40,7 @@
                 <div class="table-box">
                      <el-table
                         :data="listData"
+                        id="inOutTable"
                         style="width: 100%">
                         <el-table-column
                             prop="carNo"
@@ -86,22 +87,8 @@
                             </template>
                         </el-table-column>
                         <el-table-column
-                            prop="enterTime"
-                            label="进场闸口">
-                            <template slot-scope="{row}">
-                                {{ row.enterTime || '/' }}
-                            </template>
-                        </el-table-column>
-                        <el-table-column
                             prop="outTime"
                             label="出场时间">
-                            <template slot-scope="{row}">
-                                {{ row.outTime || '/' }}
-                            </template>
-                        </el-table-column>
-                        <el-table-column
-                            prop="outTime"
-                            label="出场闸口">
                             <template slot-scope="{row}">
                                 {{ row.outTime || '/' }}
                             </template>
@@ -126,6 +113,9 @@
 
 <script>
 import dayjs from 'dayjs';
+
+import FileSaver from 'file-saver'
+import XLSX from 'xlsx'
 
 export default {
     data(){
@@ -184,36 +174,66 @@ export default {
         self.onRefresh(1)
     },
     methods:{
-        goBack() {
-            history.back();
-        },
-        test(val) {
-            console.log('page',val)
-        },
-
-        formatter(type, val) {
-            if (type === 'year') {
-                return `${val}年`;
-            } else if (type === 'month') {
-                return `${val}月`
-            }
-            return val;
-        },
         day(t) {
             // console.log(new Date(t))
             return new Date(t)
         },
+        // 导出表格
+        exportExcel () {
+            const self = this;
+            var inoutStr = ''
+            self.carTypeColumns.map(i => {
+                self.carTypeIndex == i.value?inoutStr = i.label:''
+            })
+
+            var filename = dayjs(self.startDate).format('YYYY年MM月DD日')+'到'+dayjs(self.endDate).format('YYYY年MM月DD日')+inoutStr+"车辆信息.xlsx";
+
+            // 数据格式
+            var data = []
+
+            let params = {
+                pageNo: 1,
+                pageSize: 0,
+                key: self.key,
+                type: self.carTypeIndex,
+                startTime: dayjs(self.startDate).format('YYYY-MM-DD'),
+                endTime: dayjs(self.endDate).format('YYYY-MM-DD'),
+            }
+
+            self.$api.getParkingDetails(params).then(res => {
+                
+                if(res.h.code != 200) {
+                    self.$message.error(res.h.msg)
+                    return
+                }
+                let listData = res.b.dataList
+
+                // 数据格式处理
+                data = [['车牌号', '用户类型', '用户名称', '联系电话', '公司名称', '进场时间', '出场时间']]
+                let dataItem = []
+                listData.map(item => {
+                    dataItem = [item.carNo, item.userType, item.userName, item.telephoneNum, item.companyName, item.enterTime, item.outTime]
+                    data.push(dataItem)
+                })
+
+                // 创建工作簿和工作表
+                var wb = XLSX.utils.book_new(), // 工作簿，即一个Excel文件
+                    ws = XLSX.utils.aoa_to_sheet(data); // 工作表，即Excel内部的工作表
+                
+                // "SheetJS" 为工作表名称，即Excel文件中工作表
+                XLSX.utils.book_append_sheet(wb, ws, "搜索条件为" + self.key);
+
+            
+                // 写出Excel工作簿
+                XLSX.writeFile(wb, filename);
+
+            })
+        },
+
         turnPage(url){
             const self = this;
             if(url == '') return
             self.$router.push({ path: url, query: { startDate: self.startDate, endDate: self.endDate } });
-        },
-        confirmCarType(value, index) {
-            const self = this;
-            
-            self.carTypeIndex = index;
-            self.onRefresh()
-            self.carTypePopupCtl = false
         },
         setStartDate(value) {
             const self = this;
@@ -236,7 +256,6 @@ export default {
             self.dateTypeIndex = 3
 
         },
-
         requestData() {
             const self = this;
 
