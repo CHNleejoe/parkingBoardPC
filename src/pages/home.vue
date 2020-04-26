@@ -266,6 +266,20 @@ export default {
                     params.endTime = dayjs(self.endDate).format('YYYY')
                     break;
                 case 3:
+                    if(Math.abs(dayjs(self.startDate).diff(dayjs(self.endDate),'day'))>30) {
+                        clearTimeout(self.timer)
+                        self.timer = setTimeout(()=> {
+                            // self.$message('开始时间不能大于结束时间');
+                            this.$message({
+                                message: '由于数据量过大，自定义查询范围只能为30天',
+                                type: 'warning'
+                            });
+                            self.startDate = dayjs(self.endDate).subtract(30, 'day')
+                        }, 100)
+
+                        return false
+                    }
+
                     params.startTime = dayjs(self.startDate).format('YYYY-MM-DD')
                     params.endTime = dayjs(self.endDate).format('YYYY-MM-DD')
                     break;

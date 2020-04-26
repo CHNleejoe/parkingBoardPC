@@ -3,32 +3,9 @@
         <div class="content-box">
             <div class="search">
                 <div class="selects">
-                    <el-input class="search-input" v-model="key" placeholder="请输入车牌号或公司名称">
+                    <el-input class="search-input" v-model="key" placeholder="请输入车牌号或公司名称" @focus="addSearch" @blur="removeSearch">
                         <div class="search-icon" slot="suffix" @click="onRefresh(1)"></div>
                     </el-input>
-                    <!-- <el-select class="type" v-model="carTypeIndex" placeholder="请选择进出场类型">
-                        <el-option
-                        v-for="item in carTypeColumns"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
-                        </el-option>
-                    </el-select> -->
-                    <!-- <el-date-picker
-                    class="datepicker"
-                    v-model="startDate"
-                    type="date"
-                    @change="setStartDate"
-                    placeholder="开始日期">
-                    </el-date-picker>
-                    <div class="double-line"></div>
-                    <el-date-picker
-                    class="datepicker"
-                    v-model="endDate"
-                    type="date"
-                    @change="setEndDate"
-                    placeholder="结束日期">
-                    </el-date-picker> -->
                 </div>
                 <div class="btns">
                     <el-button class="search-btn" type="primary" @click="onRefresh(1)">查询</el-button>
@@ -41,6 +18,9 @@
                      <el-table
                         :data="listData"
                         style="width: 100%">
+                        <div class="no-data" slot="empty">
+                            <img src="../assets/imgs/Artwork@2x.png" alt="">
+                        </div>
                         <el-table-column
                             prop="carNo"
                             label="车牌号"
@@ -93,7 +73,7 @@
                             </template>
                         </el-table-column>
                     </el-table>
-                    <div class="pagination">
+                    <div class="pagination" v-show="totalItems != 0">
                         <el-pagination
                         background
                         layout="prev, pager, next"
@@ -172,20 +152,21 @@ export default {
         self.onRefresh(1)
     },
     methods:{
-        goBack() {
-            history.back();
+        addSearch() {
+            const self = this
+            document.body.addEventListener('keydown', self.keydown, false)
         },
-        test(val) {
-            console.log('page',val)
+        removeSearch() {
+            const self = this
+            document.body.removeEventListener('keydown', self.keydown, false)
         },
-
-        formatter(type, val) {
-            if (type === 'year') {
-                return `${val}年`;
-            } else if (type === 'month') {
-                return `${val}月`
+        keydown(e) {
+            const self = this
+            var ev = document.all ? window.event : e;
+            if(ev.keyCode==13) {
+                self.onRefresh(1)
+                return false;
             }
-            return val;
         },
         day(t) {
             // console.log(new Date(t))
@@ -208,6 +189,10 @@ export default {
                 
                 if(res.h.code != 200) {
                     self.$message.error(res.h.msg)
+                    return
+                }
+                if(!res.b.listData) {
+                    self.$message.error('该搜索条件下无数据，无法导出')
                     return
                 }
                 let listData = res.b.dataList

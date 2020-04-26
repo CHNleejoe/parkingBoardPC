@@ -3,19 +3,44 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    height: 4rem;
+    align-items: flex-start;
+    height: 413px;
     position: relative;
+    box-sizing: border-box;
+    padding-left: 264px;
 }
 
-.no-data>img {
-    width: 60%;
+.no-data img {
+    width: 200px;
+    height: 200px;
 }
 
 .no-data::after {
-    content: '暂时没有数据';
-    margin-top: 20px;
-    color: #999;
+    content: '页面暂无内容';
+    width: 144px;
+    height: 37px;
+    font-size: 24px;
+    font-family: SourceHanSansCN-Regular, SourceHanSansCN;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 1);
+    line-height: 36px;
+    position: absolute;
+    top: 157px;
+    left: 498px;
+}
+
+.no-data::before {
+    content: '抱歉，页面暂无内容，请看看其他页面';
+    width: 238px;
+    height: 22px;
+    font-size: 14px;
+    font-family: SourceHanSansCN-Regular, SourceHanSansCN;
+    font-weight: 400;
+    color: rgba(171, 171, 171, 1);
+    line-height: 21px;
+    position: absolute;
+    top: 205px;
+    left: 498px;
 }
 
 ::-webkit-input-placeholder {

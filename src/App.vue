@@ -56,6 +56,9 @@ export default {
       border-width: 0;
     }
   }
+  /deep/ .el-table__empty-text {
+    width: 100%;
+  }
   #app{
     display: flex;
     justify-content: center;
