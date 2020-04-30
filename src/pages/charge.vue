@@ -246,7 +246,7 @@ export default {
                     self.$message.error(res.h.msg)
                     return
                 }
-                if(!res.b.listData) {
+                if(res.b.dataList.length == 0) {
                     self.$message.error('该搜索条件下无数据，无法导出')
                     return
                 }
@@ -340,7 +340,7 @@ export default {
 <style lang="scss" scoped>
     .content-box{
         font-size: 14px;
-        width:1080px;
+        width:1050px;
         background:rgba(52,38,96,1);
         padding: 20px 39px 0 41px;
         box-sizing: border-box;
@@ -352,7 +352,7 @@ export default {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 60px;
+            padding: 0 40px;
             .selects{
                 display: flex;
                 justify-content: flex-start;

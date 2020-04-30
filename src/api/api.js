@@ -7,7 +7,7 @@ import axios from "axios"
 import { getPorts } from 'portfinder';
 
 
-// axios.defaults.baseURL = 'http://139.9.1.59:8080/'; //59服务器
+// axios.defaults.baseURL = 'https://tps.apipecloud.com'; //59服务器
 axios.defaults.baseURL = 'http://192.168.3.171:8680/'; //测试服务器
 // axios.defaults.baseURL = 'http://192.168.3.194:8080/'; //本地
 

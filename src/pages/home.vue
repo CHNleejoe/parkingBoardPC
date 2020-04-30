@@ -721,7 +721,7 @@ export default {
 <style lang="scss" scoped>
     .content-box{
         font-size: 14px;
-        width:1080px;
+        width:1050px;
         background:rgba(52,38,96,1);
         padding: 20px 39px 0 41px;
         box-sizing: border-box;
@@ -784,6 +784,7 @@ export default {
             flex-wrap: wrap;
             .data-item{
                 width:165px;
+                // max-width: 165px;
                 height:68px;
                 background:rgba(19,25,41,1);
                 border-radius:8px;
@@ -791,7 +792,7 @@ export default {
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 20px;
-                margin-right: 43px;
+                margin-right: 35px;
                 box-sizing: border-box;
                 padding-left: 12px;
                 &.point{
