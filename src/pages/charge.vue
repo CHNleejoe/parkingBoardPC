@@ -36,7 +36,7 @@
                 </div>
             </div>
             <div class="datas">
-                <div class="title">停车消费查询</div>
+                <div class="title">停车收费查询</div>
                 <div class="table-box">
                      <el-table
                         :data="listData"
@@ -83,6 +83,8 @@
                         </el-table-column>
                         <el-table-column
                             prop="enterTime"
+                            width='100'
+
                             label="进场时间">
                             <template slot-scope="{row}">
                                 {{ row.enterTime || '/' }}
@@ -91,6 +93,8 @@
                         
                         <el-table-column
                             prop="outTime"
+                            width='100'
+
                             label="出场时间">
                             <template slot-scope="{row}">
                                 {{ row.outTime || '/' }}
@@ -105,6 +109,8 @@
                         </el-table-column>
                         <el-table-column
                             prop="createTime"
+                            width='100'
+
                             label="充值时间">
                             <template slot-scope="{row}">
                                 {{ row.createTime || '/' }}

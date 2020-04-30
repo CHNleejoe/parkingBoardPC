@@ -75,6 +75,7 @@
                         </el-table-column>
                         <el-table-column
                             prop="startDate"
+                            width='100'
                             label="生效时间">
                             <template slot-scope="{row}">
                                 {{ row.startDate || '/' }}
@@ -83,6 +84,7 @@
                         
                         <el-table-column
                             prop="endDate"
+                            width='100'
                             label="结束时间">
                             <template slot-scope="{row}">
                                 {{ row.endDate || '/' }}

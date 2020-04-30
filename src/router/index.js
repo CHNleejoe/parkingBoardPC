@@ -19,7 +19,7 @@ Vue.use(Router)
 export default new Router({
     routes: [
         { path: '/', name: 'Home', component: Home },
-        { path: '/charge', name: 'Charge', component: Charge, meta: { title: '停车消费查询' } }, // 停车收费列表
+        { path: '/charge', name: 'Charge', component: Charge, meta: { title: '停车收费查询' } }, // 停车收费列表
         { path: '/inOut', name: 'InOut', component: InOut, meta: { title: '车辆进出查询' } }, // 车辆进出明细
         { path: '/inParking', name: 'InParking', component: InParking, meta: { title: '在场车辆查询' } }, // 车辆进出明细
         { path: '/user', name: 'User', component: User, meta: { title: '会员车辆查询' } }, // 车辆进出明细

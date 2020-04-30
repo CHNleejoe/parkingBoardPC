@@ -84,6 +84,8 @@
                         </el-table-column>
                         <el-table-column
                             prop="enterTime"
+                            width='100'
+
                             label="进场时间">
                             <template slot-scope="{row}">
                                 {{ row.enterTime || '/' }}
@@ -91,6 +93,8 @@
                         </el-table-column>
                         <el-table-column
                             prop="outTime"
+                            width='100'
+
                             label="出场时间">
                             <template slot-scope="{row}">
                                 {{ row.outTime || '/' }}
