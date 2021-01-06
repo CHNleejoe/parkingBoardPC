@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@antv/f2": "^3.6.3",
-        "axios": "^0.19.2",
+        "axios": "^0.21.1",
         "dayjs": "^1.8.24",
         "echarts": "^4.7.0",
         "element-ui": "^2.13.1",
